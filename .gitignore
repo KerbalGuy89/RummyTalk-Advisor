@@ -1,0 +1,7 @@
+.env
+*.pem
+*.key
+.claude/
+*.json.bak
+node_modules/
+dist/

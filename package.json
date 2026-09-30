@@ -1,0 +1,12 @@
+{
+  "name": "gin-scorekeeper",
+  "private": true,
+  "description": "Builds the user guide and the shareable zip. The app itself (index.html) needs no build.",
+  "scripts": {
+    "guide": "node docs/build-guide.js",
+    "package": "npm run guide && pwsh -NoProfile -File package.ps1"
+  },
+  "devDependencies": {
+    "docx": "^9.5.0"
+  }
+}
