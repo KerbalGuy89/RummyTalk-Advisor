@@ -3,239 +3,154 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gin Scorekeeper</title>
+<meta name="description" content="Hollywood gin rummy scorekeeper: three games at once, boxes, undercuts, spade doubles and the money.">
 <meta name="theme-color" content="#1d5a43">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Gin Score">
-<title>Gin Scorekeeper</title>
-<meta name="description" content="Hollywood gin rummy scorekeeper — three games at once, boxes, undercuts, spade doubles and the money.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
 <style>
   :root {
-    --felt: #1d5a43;
-    --felt-ink: #f5f1e4;
-    --paper: #f6f2e8;
-    --card: #fffdf8;
-    --ink: #1c2621;
-    --muted: #68716b;
-    --line: #e3dccb;
-    --shade: #efe9db;
-    --accent: #1d5a43;
-    --accent-ink: #ffffff;
-    --red: #b3261e;
-    --gold: #a87a10;
-    --p0: #2b64a8;
-    --p1: #b04f24;
-    --p0-soft: #e3ecf7;
-    --p1-soft: #f7e7df;
+    --felt: #1d5a43; --felt-ink: #f5f1e4;
+    --paper: #f6f2e8; --card: #fffdf8; --ink: #1c2621; --muted: #68716b; --line: #e3dccb; --shade: #efe9db;
+    --accent: #1d5a43; --accent-ink: #fff; --red: #b3261e; --gold: #a87a10;
+    --p0: #2b64a8; --p1: #b04f24; --p0-soft: #e3ecf7; --p1-soft: #f7e7df; --on-player: #fff;
     --shadow: 0 1px 2px rgba(20, 30, 25, .06), 0 4px 14px rgba(20, 30, 25, .06);
   }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --felt: #143b2d;
-      --felt-ink: #ece8dc;
-      --paper: #0f1512;
-      --card: #18201c;
-      --ink: #e8e5dc;
-      --muted: #98a19b;
-      --line: #2b3530;
-      --shade: #1f2924;
-      --accent: #4fae84;
-      --accent-ink: #0b1510;
-      --red: #f07b70;
-      --gold: #e2b54c;
-      --p0: #79aee8;
-      --p1: #eb9a73;
-      --p0-soft: #1c2a3a;
-      --p1-soft: #35231b;
+    :root {
+      --felt: #143b2d; --felt-ink: #ece8dc;
+      --paper: #0f1512; --card: #18201c; --ink: #e8e5dc; --muted: #98a19b; --line: #2b3530; --shade: #1f2924;
+      --accent: #4fae84; --accent-ink: #0b1510; --red: #f07b70; --gold: #e2b54c;
+      --p0: #79aee8; --p1: #eb9a73; --p0-soft: #1c2a3a; --p1-soft: #35231b; --on-player: #0b1510;
       --shadow: 0 1px 2px rgba(0, 0, 0, .3);
     }
   }
-  :root[data-theme="dark"] {
-    --felt: #143b2d; --felt-ink: #ece8dc; --paper: #0f1512; --card: #18201c; --ink: #e8e5dc;
-    --muted: #98a19b; --line: #2b3530; --shade: #1f2924; --accent: #4fae84; --accent-ink: #0b1510;
-    --red: #f07b70; --gold: #e2b54c; --p0: #79aee8; --p1: #eb9a73; --p0-soft: #1c2a3a; --p1-soft: #35231b;
-    --shadow: 0 1px 2px rgba(0, 0, 0, .3);
-  }
 
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html { -webkit-text-size-adjust: 100%; }
-  body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  input:focus-visible, button:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .num { font-variant-numeric: tabular-nums; }
-  button { font: inherit; color: inherit; cursor: pointer; }
-  input, select { font: inherit; color: inherit; }
+  .muted { color: var(--muted); font-weight: 400; font-size: 14px; }
 
   /* Header */
-  .top {
-    background: var(--felt);
-    color: var(--felt-ink);
-    padding: 14px 16px;
-  }
-  .top-inner {
-    max-width: 1080px; margin: 0 auto;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
-  }
+  .top { background: var(--felt); color: var(--felt-ink); padding: 14px 16px; }
+  .top-inner { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .brand { display: flex; align-items: baseline; gap: 10px; }
-  .brand h1 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: .2px; }
-  .brand .suits { font-size: 18px; letter-spacing: 2px; opacity: .9; }
+  .brand h1 { margin: 0; font-size: 20px; font-weight: 650; }
+  .brand .suits { font-size: 18px; letter-spacing: 2px; }
   .brand .suits .r { color: #ff9b91; }
   .top-actions { display: flex; gap: 8px; }
-  .ghost {
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25);
-    color: var(--felt-ink); border-radius: 8px; padding: 7px 12px; font-size: 14px;
-  }
+  .ghost { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); color: var(--felt-ink); border-radius: 8px; padding: 7px 12px; font-size: 14px; }
   .ghost:hover { background: rgba(255,255,255,.18); }
 
   main { max-width: 1080px; margin: 0 auto; padding: 16px; }
 
-  /* Column cards */
+  /* Banners */
+  .warnbar { background: #fde7e4; color: #7a1c14; border: 1px solid #f2b8b1; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; font-size: 14px; }
+  .warnbar b { display: block; font-size: 15px; margin-bottom: 2px; }
+  .over { background: var(--felt); color: var(--felt-ink); border-radius: 12px; padding: 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .over .big { font-size: 20px; font-weight: 700; }
+  .over .p0c, .over .p1c { color: inherit; }
+  .over button { background: var(--felt-ink); color: var(--felt); border: 0; border-radius: 9px; padding: 11px 16px; font-weight: 650; }
+
+  /* Game cards */
   .columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-  .col-card {
-    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-    padding: 12px; box-shadow: var(--shadow); min-width: 0;
-  }
+  .col-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; box-shadow: var(--shadow); min-width: 0; }
   .col-card.closed { background: var(--shade); }
   .col-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 6px; }
-  .col-head .t { font-weight: 650; font-size: 15px; }
-  .badge {
-    font-size: 11px; font-weight: 650; padding: 2px 7px; border-radius: 999px;
-    background: var(--shade); color: var(--muted); border: 1px solid var(--line); white-space: nowrap;
-  }
+  .col-head .t { font-weight: 650; font-size: 15px; white-space: nowrap; }
+  .badge { font-size: 11px; font-weight: 650; padding: 2px 7px; border-radius: 999px; background: var(--shade); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
   .badge.gold { color: var(--gold); border-color: currentColor; background: transparent; }
   .pl { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 8px; margin-top: 6px; }
   .pl .nm { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .pl .pts { font-size: 26px; font-weight: 700; line-height: 1.1; text-align: right; }
-  .pl.p0 .pts { color: var(--p0); }
-  .pl.p1 .pts { color: var(--p1); }
   .pl .bx { font-size: 12px; color: var(--muted); grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; }
   .bar { flex: 1; height: 5px; background: var(--shade); border-radius: 99px; overflow: hidden; }
   .col-card.closed .bar { background: var(--line); }
   .bar i { display: block; height: 100%; border-radius: 99px; }
-  .pl.p0 .bar i { background: var(--p0); }
-  .pl.p1 .bar i { background: var(--p1); }
+  .pl.p0 .pts { color: var(--p0); } .pl.p0 .bar i { background: var(--p0); }
+  .pl.p1 .pts { color: var(--p1); } .pl.p1 .bar i { background: var(--p1); }
   .col-status { margin-top: 10px; font-size: 13px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 8px; }
   .col-status b { color: var(--ink); }
 
-  /* Layout */
-  .layout { display: grid; gap: 16px; grid-template-columns: 1fr; }
-  @media (min-width: 900px) {
-    .layout { grid-template-columns: 360px 1fr; align-items: start; }
-  }
+  /* Layout and cards */
+  .layout { display: grid; gap: 16px; }
+  @media (min-width: 900px) { .layout { grid-template-columns: 360px 1fr; align-items: start; } }
   .stack { display: grid; gap: 16px; min-width: 0; }
-  .card {
-    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-    padding: 16px; box-shadow: var(--shadow); min-width: 0;
-  }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; box-shadow: var(--shadow); min-width: 0; }
   .card h2 { margin: 0 0 12px; font-size: 16px; font-weight: 650; }
   .card h2 small { font-weight: 400; color: var(--muted); font-size: 13px; }
 
-  /* Form */
+  /* Hand entry */
   .field { display: block; margin-bottom: 12px; }
   .label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
   .label small { font-size: 12px; }
   .seg { display: flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
-  .seg button {
-    flex: 1; background: transparent; border: 0; padding: 10px 6px; font-size: 15px; min-height: 44px;
-    border-left: 1px solid var(--line); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
+  .seg button { flex: 1; background: transparent; border: 0; border-left: 1px solid var(--line); padding: 10px 6px; font-size: 15px; min-height: 44px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .seg button:first-child { border-left: 0; }
   .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 650; }
-  .seg.players button[data-v="0"][aria-pressed="true"] { background: var(--p0); color: #fff; }
-  .seg.players button[data-v="1"][aria-pressed="true"] { background: var(--p1); color: #fff; }
-  :root[data-theme="dark"] .seg.players button[aria-pressed="true"] { color: #0b1510; }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .seg.players button[aria-pressed="true"] { color: #0b1510; }
-  }
+  .seg.players button[aria-pressed="true"] { color: var(--on-player); }
+  .seg.players button[data-v="0"][aria-pressed="true"] { background: var(--p0); }
+  .seg.players button[data-v="1"][aria-pressed="true"] { background: var(--p1); }
   .seg.suits button { font-size: 22px; line-height: 1; }
   .seg.suits button.r { color: var(--red); }
   .seg.suits button[aria-pressed="true"] { background: var(--ink); color: var(--card); }
   .seg.suits button.r[aria-pressed="true"] { color: #ff9b91; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
-  input[type="number"], input[type="text"], select {
-    width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 9px;
-    background: var(--paper); font-size: 18px; min-height: 44px;
-  }
-  input:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .hint { font-size: 12px; color: var(--muted); margin-top: 5px; min-height: 1em; }
-  .preview {
-    border-radius: 9px; padding: 10px 12px; margin: 4px 0 12px; font-size: 14px;
-    background: var(--shade); color: var(--muted); min-height: 44px;
-  }
+  input[type="number"], input[type="text"], select { width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--paper); font-size: 18px; min-height: 44px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
+  .preview { border-radius: 9px; padding: 10px 12px; margin: 4px 0 12px; font-size: 14px; background: var(--shade); color: var(--muted); min-height: 44px; }
   .preview b { color: var(--ink); }
   .preview .big { font-size: 17px; }
-  .preview.warn { color: var(--red); }
-  .actions { display: flex; gap: 8px; }
-  .primary {
-    flex: 1; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 9px;
-    padding: 12px; font-weight: 650; font-size: 16px; min-height: 48px;
-  }
-  .primary:disabled { opacity: .45; cursor: not-allowed; }
-  .secondary {
-    background: transparent; border: 1px solid var(--line); border-radius: 9px; padding: 10px 14px; min-height: 44px;
-  }
-  .secondary:hover { background: var(--shade); }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .primary { flex: 1; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 9px; padding: 12px; font-weight: 650; font-size: 16px; min-height: 48px; }
+  .secondary { background: transparent; border: 1px solid var(--line); border-radius: 9px; padding: 10px 14px; min-height: 44px; }
+  .secondary:hover:not(:disabled) { background: var(--shade); }
   .p0c { color: var(--p0); font-weight: 650; }
   .p1c { color: var(--p1); font-weight: 650; }
+  .dbl { color: var(--red); font-weight: 650; }
 
-  .warnbar {
-    background: #fde7e4; color: #7a1c14; border: 1px solid #f2b8b1; border-radius: 12px;
-    padding: 12px 14px; margin-bottom: 16px; font-size: 14px;
-  }
-  .warnbar b { display: block; font-size: 15px; margin-bottom: 2px; }
-
-  /* Game over banner */
-  .over {
-    background: var(--felt); color: var(--felt-ink); border-radius: 12px; padding: 16px; margin-bottom: 16px;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
-  }
-  .over .big { font-size: 20px; font-weight: 700; }
-  .over button { background: var(--felt-ink); color: var(--felt); border: 0; border-radius: 9px; padding: 11px 16px; font-weight: 650; }
-
-  /* Score sheet table */
+  /* Score sheet */
   .sheet-wrap { overflow-x: auto; margin: 0 -16px; padding: 0 16px; }
   table.sheet { border-collapse: collapse; width: 100%; font-size: 14px; }
-  .sheet th, .sheet td { padding: 6px 6px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .sheet th, .sheet td { padding: 6px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
   .sheet thead th { font-size: 12px; color: var(--muted); font-weight: 600; border-bottom: 2px solid var(--line); }
-  .sheet thead tr:first-child th { font-size: 13px; }
+  .sheet thead tr:first-child th { font-size: 13px; text-align: center; }
   .sheet th.p0h { color: var(--p0); }
   .sheet th.p1h { color: var(--p1); }
-  .sheet td.first-of-player { border-left: 2px solid var(--line); }
-  .sheet th.first-of-player { border-left: 2px solid var(--line); }
-  .sheet td.idx { color: var(--muted); text-align: left; font-size: 12px; }
-  .sheet td.desc { text-align: left; color: var(--muted); font-size: 13px; }
+  .sheet .split { border-left: 2px solid var(--line); }
+  .sheet .left { text-align: left; }
+  .sheet td.idx { color: var(--muted); font-size: 12px; }
+  .sheet td.desc { color: var(--muted); font-size: 13px; }
   .sheet td.win.p0 { background: var(--p0-soft); }
   .sheet td.win.p1 { background: var(--p1-soft); }
   .sheet td.win .run { font-weight: 650; }
-  .sheet td .add { display: block; font-size: 11px; color: var(--muted); font-weight: 400; }
+  .sheet td .add { display: block; font-size: 11px; color: var(--muted); }
   .sheet td.dead { background: repeating-linear-gradient(135deg, transparent 0 6px, var(--shade) 6px 7px); }
   .sheet td.closer .run::after { content: " ★"; color: var(--gold); }
-  .circ {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 17px; height: 17px; padding: 0 3px; border-radius: 99px; border: 1.5px solid currentColor;
-    font-size: 10px; font-weight: 700; margin-left: 4px; vertical-align: 1px;
-  }
-  .del { background: transparent; border: 0; color: var(--muted); padding: 4px 6px; border-radius: 6px; font-size: 16px; }
+  .circ { display: inline-flex; align-items: center; justify-content: center; min-width: 17px; height: 17px; padding: 0 3px; border-radius: 99px; border: 1.5px solid currentColor; font-size: 10px; font-weight: 700; margin-left: 4px; vertical-align: 1px; }
+  .del { background: transparent; border: 0; color: var(--muted); padding: 4px 8px; border-radius: 6px; font-size: 18px; }
   .del:hover { color: var(--red); background: var(--shade); }
-  .empty { color: var(--muted); font-size: 14px; padding: 18px 0 6px; text-align: center; }
-  .dbl { color: var(--red); font-weight: 650; }
+  .empty { color: var(--muted); font-size: 14px; padding: 18px 0 6px; text-align: center !important; }
 
-  /* Settlement */
+  /* Settle up */
   .settle-row { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; padding: 8px 0; border-bottom: 1px dashed var(--line); align-items: baseline; }
-  .settle-row:last-of-type { border-bottom: 0; }
   .settle-row .g { font-weight: 650; font-size: 14px; }
-  .settle-row .math { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
   .settle-row .v { font-weight: 650; }
+  .settle-row .math { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
   .settle-row.pending .v, .settle-row.pending .who { color: var(--muted); font-weight: 400; font-style: italic; }
-  .total {
-    margin-top: 10px; padding: 12px; border-radius: 10px; background: var(--shade);
-  }
+  .total { margin-top: 10px; padding: 12px; border-radius: 10px; background: var(--shade); }
   .total .line { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); }
-  .total .money { font-size: 22px; font-weight: 750; color: var(--ink); margin-top: 6px; }
+  .total .money { font-size: 22px; font-weight: 750; margin-top: 6px; }
+  .total .money.soft { font-size: 18px; }
   .total .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
   /* Ledger */
@@ -243,25 +158,26 @@
   .games { list-style: none; margin: 0 0 12px; padding: 0; max-height: 260px; overflow-y: auto; }
   .games li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
   .games li span:first-child { color: var(--muted); }
-  .row-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 
-  /* Settings dialog */
-  dialog {
-    border: 1px solid var(--line); border-radius: 14px; padding: 0; background: var(--card); color: var(--ink);
-    width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px);
-  }
+  /* Settings */
+  dialog { border: 1px solid var(--line); border-radius: 14px; padding: 0; background: var(--card); color: var(--ink); width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
   dialog::backdrop { background: rgba(10, 20, 15, .5); }
   .dlg-body { padding: 18px; overflow-y: auto; max-height: calc(100vh - 110px); }
   .dlg-body h3 { margin: 18px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); }
-  .dlg-body h3:first-child { margin-top: 0; }
+  .dlg-body h3:first-of-type { margin-top: 0; }
+  .welcome { margin: 0 0 16px; padding: 10px 12px; border-radius: 9px; background: var(--shade); font-size: 15px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .grid2 .field { margin-bottom: 0; }
   .grid2 input, .grid2 select { font-size: 16px; }
   .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; margin: 8px 0; }
   .check input { width: 20px; height: 20px; margin-top: 1px; flex: none; }
   .check small { display: block; color: var(--muted); }
-  .dlg-foot { display: flex; justify-content: space-between; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--line); }
+  details.rules { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 12px; }
+  details.rules summary { cursor: pointer; font-weight: 650; min-height: 32px; }
+  details.rules summary small { font-weight: 400; color: var(--muted); }
+  .dlg-foot { display: flex; justify-content: space-between; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--line); flex-wrap: wrap; }
   .dlg-foot .primary { flex: none; padding: 10px 22px; }
+  .dlg-foot .right { display: flex; gap: 8px; }
 
   .foot { text-align: center; font-size: 12px; color: var(--muted); padding: 8px 16px 28px; }
   .foot a { color: inherit; }
@@ -269,17 +185,17 @@
   @media (max-width: 560px) {
     .columns { gap: 8px; }
     .col-card { padding: 9px; }
-    .pl .pts { font-size: 21px; }
     .col-head .t { font-size: 13px; }
+    .pl .pts { font-size: 21px; }
     .badge { font-size: 10px; padding: 1px 5px; }
+    .badge .long { display: none; }
     .col-status { font-size: 11.5px; }
     .brand h1 { font-size: 18px; }
-    .badge .long { display: none; }
-    .col-head .t { white-space: nowrap; }
   }
   @media (max-width: 380px) {
     .pl .pts { font-size: 18px; }
     .pl .nm { font-size: 11px; }
+    .grid2 { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -292,8 +208,8 @@
       <h1>Gin Scorekeeper</h1>
     </div>
     <div class="top-actions">
-      <button class="ghost" id="btnNew">New game</button>
-      <button class="ghost" id="btnSettings">Settings</button>
+      <button type="button" class="ghost" id="btnNew">New game</button>
+      <button type="button" class="ghost" id="btnSettings">Settings</button>
     </div>
   </div>
 </header>
@@ -305,39 +221,39 @@
 
   <div class="layout">
     <div class="stack">
-      <section class="card" id="entry">
-        <h2>Record a hand</h2>
+      <section class="card" aria-labelledby="entryTitle">
+        <h2 id="entryTitle">Record a hand</h2>
         <div class="field">
-          <span class="label">Who knocked or went gin?</span>
-          <div class="seg players" id="segKnocker" role="group">
-            <button type="button" data-v="0" aria-pressed="false"></button>
-            <button type="button" data-v="1" aria-pressed="false"></button>
+          <span class="label" id="lblKnocker">Who knocked or went gin?</span>
+          <div class="seg players" id="segKnocker" role="group" aria-labelledby="lblKnocker">
+            <button type="button" data-v="0"></button>
+            <button type="button" data-v="1"></button>
           </div>
         </div>
         <div class="field">
-          <span class="label">How?</span>
-          <div class="seg" id="segType" role="group">
-            <button type="button" data-v="knock" aria-pressed="true">Knock</button>
-            <button type="button" data-v="gin" aria-pressed="false">Gin</button>
+          <span class="label" id="lblType">How?</span>
+          <div class="seg" id="segType" role="group" aria-labelledby="lblType">
+            <button type="button" data-v="knock">Knock</button>
+            <button type="button" data-v="gin">Gin</button>
           </div>
         </div>
         <div class="row2">
           <label class="field" id="fKn">
             <span class="label">Knocker's deadwood</span>
-            <input id="inKn" type="number" inputmode="numeric" min="0" step="1" placeholder="0">
+            <input id="inKn" type="number" inputmode="numeric" min="1" max="10" step="1" placeholder="0">
           </label>
-          <label class="field" id="fOpp">
-            <span class="label" id="lblOpp">Other player's deadwood <small>(after lay-offs)</small></span>
+          <label class="field">
+            <span class="label" id="lblOpp">Other player's deadwood</span>
             <input id="inOpp" type="number" inputmode="numeric" min="0" step="1" placeholder="0">
           </label>
         </div>
         <div class="field">
-          <span class="label">Knock card suit <small>(optional)</small></span>
-          <div class="seg suits" id="segSuit" role="group">
-            <button type="button" data-v="S" aria-pressed="false" aria-label="Spades">♠</button>
-            <button type="button" data-v="H" aria-pressed="false" aria-label="Hearts" class="r">♥</button>
-            <button type="button" data-v="D" aria-pressed="false" aria-label="Diamonds" class="r">♦</button>
-            <button type="button" data-v="C" aria-pressed="false" aria-label="Clubs">♣</button>
+          <span class="label" id="lblSuit">Knock card suit <small>(optional)</small></span>
+          <div class="seg suits" id="segSuit" role="group" aria-labelledby="lblSuit">
+            <button type="button" data-v="S" aria-label="Spades">♠</button>
+            <button type="button" data-v="H" aria-label="Hearts" class="r">♥</button>
+            <button type="button" data-v="D" aria-label="Diamonds" class="r">♦</button>
+            <button type="button" data-v="C" aria-label="Clubs">♣</button>
           </div>
           <div class="hint" id="dblNote"></div>
         </div>
@@ -348,26 +264,27 @@
         </div>
       </section>
 
-      <section class="card" id="settle">
-        <h2>Settle up</h2>
+      <section class="card" aria-labelledby="settleTitle">
+        <h2 id="settleTitle">Settle up</h2>
         <div id="settleBody"></div>
       </section>
     </div>
 
     <div class="stack">
-      <section class="card">
-        <h2>Score sheet <small id="handCount"></small></h2>
+      <section class="card" aria-labelledby="sheetTitle">
+        <h2 id="sheetTitle">Score sheet <small id="handCount"></small></h2>
         <div class="sheet-wrap">
           <table class="sheet num" id="sheet"></table>
         </div>
       </section>
 
-      <section class="card" id="ledger">
-        <h2>Ledger <small>saved games</small></h2>
+      <section class="card" aria-labelledby="ledgerTitle">
+        <h2 id="ledgerTitle">Ledger <small>saved games</small></h2>
         <div id="ledgerBody"></div>
-        <div class="row-btns">
+        <div class="actions">
           <button type="button" class="secondary" id="btnExport">Export backup</button>
           <button type="button" class="secondary" id="btnImport">Import backup</button>
+          <button type="button" class="secondary" id="btnClearLedger">Clear ledger</button>
           <input type="file" id="fileImport" accept="application/json,.json" hidden>
         </div>
       </section>
@@ -375,45 +292,21 @@
   </div>
 </main>
 
-<p class="foot">Scoring follows <a href="https://rummytalk.com/scoring-individual-hands-of-a-two-handed-game/" target="_blank" rel="noopener">RummyTalk</a> Hollywood rules. Every number is adjustable in Settings. Saved in this browser only, so export a backup now and then.</p>
+<p class="foot">Scoring follows <a href="https://rummytalk.com/scoring-individual-hands-of-a-two-handed-game/" target="_blank" rel="noopener">RummyTalk</a> Hollywood rules. Scores are saved in this browser only, so export a backup now and then.</p>
 
-<dialog id="settingsDlg">
+<dialog id="settingsDlg" aria-labelledby="settingsTitle">
   <form method="dialog" id="settingsForm">
     <div class="dlg-body">
-      <h3>Players</h3>
+      <p class="welcome" id="welcome" hidden><b>Welcome!</b> Type the two players' names, set the stakes, then tap Save.</p>
+      <h3 id="settingsTitle">Players</h3>
       <div class="grid2">
-        <label class="field"><span class="label">Player 1</span><input type="text" name="p0" maxlength="16"></label>
-        <label class="field"><span class="label">Player 2</span><input type="text" name="p1" maxlength="16"></label>
+        <label class="field"><span class="label">Player 1</span><input type="text" name="p0" maxlength="16" autocomplete="off"></label>
+        <label class="field"><span class="label">Player 2</span><input type="text" name="p1" maxlength="16" autocomplete="off"></label>
       </div>
-
-      <h3>Hands</h3>
-      <div class="grid2">
-        <label class="field"><span class="label">Gin bonus (points)</span><input type="number" name="ginBonus" min="0"></label>
-        <label class="field"><span class="label">Gin bonus boxes</span><input type="number" name="ginBoxes" min="0"></label>
-        <label class="field"><span class="label">Undercut bonus (points)</span><input type="number" name="undercutBonus" min="0"></label>
-        <label class="field"><span class="label">Undercut bonus boxes</span><input type="number" name="undercutBoxes" min="0"></label>
-      </div>
-      <label class="check"><input type="checkbox" name="handBox"><span>Every hand won is worth 1 box<small>On top of the gin and undercut bonus boxes. This is standard Hollywood scoring.</small></span></label>
-      <label class="field" style="margin-top:10px"><span class="label">Knock card suits that double the hand</span>
-        <select name="doubleSuits">
-          <option value="S">Spades only</option>
-          <option value="SH">Spades and hearts</option>
-          <option value="">None</option>
-        </select>
-      </label>
-
-      <h3>Games</h3>
-      <div class="grid2">
-        <label class="field"><span class="label">Points to win a game</span><input type="number" name="target" min="1"></label>
-        <label class="field"><span class="label">Game bonus</span><input type="number" name="gameBonus" min="0"></label>
-        <label class="field"><span class="label">Value per box</span><input type="number" name="boxValue" min="0"></label>
-      </div>
-      <label class="check"><input type="checkbox" name="col3Double"><span>Game 3 counts double</span></label>
-      <label class="check"><input type="checkbox" name="shutoutDouble"><span>Shutout doubles the game<small>Applies when the loser scored 0 in that game.</small></span></label>
 
       <h3>Stakes</h3>
       <div class="grid2">
-        <label class="field"><span class="label">Cents per point</span><input type="number" name="cents" min="0" step="0.01"></label>
+        <label class="field"><span class="label">Cents per point</span><input type="number" name="cents" min="0" step="0.01" inputmode="decimal"></label>
         <label class="field"><span class="label">Round final score to</span>
           <select name="rounding">
             <option value="500">Nearest 500</option>
@@ -422,87 +315,95 @@
           </select>
         </label>
       </div>
+
+      <details class="rules">
+        <summary>Scoring rules <small>(leave these unless your group plays differently)</small></summary>
+        <h3>Hands</h3>
+        <div class="grid2">
+          <label class="field"><span class="label">Gin bonus (points)</span><input type="number" name="ginBonus" min="0" inputmode="numeric"></label>
+          <label class="field"><span class="label">Gin bonus boxes</span><input type="number" name="ginBoxes" min="0" inputmode="numeric"></label>
+          <label class="field"><span class="label">Undercut bonus (points)</span><input type="number" name="undercutBonus" min="0" inputmode="numeric"></label>
+          <label class="field"><span class="label">Undercut bonus boxes</span><input type="number" name="undercutBoxes" min="0" inputmode="numeric"></label>
+        </div>
+        <label class="check"><input type="checkbox" name="handBox"><span>Every hand won is worth 1 box<small>On top of the gin and undercut bonus boxes. This is standard Hollywood scoring.</small></span></label>
+        <label class="field"><span class="label">Knock card suits that double the hand</span>
+          <select name="doubleSuits">
+            <option value="S">Spades only</option>
+            <option value="SH">Spades and hearts</option>
+            <option value="">None</option>
+          </select>
+        </label>
+
+        <h3>Games</h3>
+        <div class="grid2">
+          <label class="field"><span class="label">Points to win a game</span><input type="number" name="target" min="1" inputmode="numeric"></label>
+          <label class="field"><span class="label">Game bonus</span><input type="number" name="gameBonus" min="0" inputmode="numeric"></label>
+          <label class="field"><span class="label">Value per box</span><input type="number" name="boxValue" min="0" inputmode="numeric"></label>
+        </div>
+        <label class="check"><input type="checkbox" name="col3Double"><span>Game 3 counts double</span></label>
+        <label class="check"><input type="checkbox" name="shutoutDouble"><span>Shutout doubles the game<small>Applies when the loser scored 0 in that game.</small></span></label>
+      </details>
     </div>
     <div class="dlg-foot">
       <button type="button" class="secondary" id="btnDefaults">Reset to defaults</button>
-      <div style="display:flex;gap:8px">
+      <div class="right">
         <button type="button" class="secondary" id="btnCancel">Cancel</button>
-        <button type="submit" class="primary" value="save">Save</button>
+        <button type="submit" class="primary">Save</button>
       </div>
     </div>
   </form>
 </dialog>
 
-<script>
-(() => {
+<script id="engine">
+// Scoring engine: pure functions, no page access. Tested by `npm test` (tools/engine.test.js).
+const GinEngine = (() => {
   'use strict';
-
-  const KEY = 'rummytalk-score-v1';
   const DEFAULTS = {
     target: 250, gameBonus: 250, boxValue: 25,
     ginBonus: 25, ginBoxes: 2, undercutBonus: 25, undercutBoxes: 1,
     handBox: true, doubleSuits: 'S', col3Double: true, shutoutDouble: true,
     cents: 1, rounding: 500,
   };
-  const SUIT = { S: '♠', H: '♥', D: '♦', C: '♣' };
+  const MAX_KNOCK = 10;    // no knock card allows more than 10 deadwood
+  const MAX_DEADWOOD = 98; // most deadwood 10 unmatched cards can hold
 
-  // ---------- state ----------
-  function freshState() {
-    return { v: 1, players: ['Player 1', 'Player 2'], settings: { ...DEFAULTS }, hands: [], ledger: [], startedAt: Date.now() };
+  // Hand = { knocker: 0|1, type: 'knock'|'gin', kn: knocker's deadwood (0 for gin), opp: other player's deadwood, suit: 'S'|'H'|'D'|'C'|null }
+  // Returns why a hand can't be real, or '' if it's fine.
+  function checkHand(h) {
+    if (!h || (h.knocker !== 0 && h.knocker !== 1)) return 'Pick who knocked or went gin.';
+    if (h.type !== 'knock' && h.type !== 'gin') return 'Pick Knock or Gin.';
+    if (!Number.isInteger(h.opp) || h.opp < 0) return 'Deadwood must be a whole number, 0 or more.';
+    if (h.opp > MAX_DEADWOOD) return `No hand holds more than ${MAX_DEADWOOD} deadwood. Check the other player's number.`;
+    if (h.type === 'knock') {
+      if (!Number.isInteger(h.kn) || h.kn < 0) return 'Deadwood must be a whole number, 0 or more.';
+      if (h.kn === 0) return 'Zero deadwood is gin. Tap Gin instead of Knock.';
+      if (h.kn > MAX_KNOCK) return `You can't knock with more than ${MAX_KNOCK} deadwood. Did the two numbers get swapped?`;
+    }
+    if (h.suit != null && !['S', 'H', 'D', 'C'].includes(h.suit)) return 'Unknown knock card suit.';
+    return '';
   }
-  let firstRun = false;
-  function load() {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (!raw) { firstRun = true; return freshState(); }
-      const st = JSON.parse(raw);
-      return normalize(st);
-    } catch (e) { return freshState(); }
-  }
-  function normalize(st) {
-    const base = freshState();
-    return {
-      v: 1,
-      players: Array.isArray(st.players) && st.players.length === 2 ? st.players.map(String) : base.players,
-      settings: { ...DEFAULTS, ...(st.settings || {}) },
-      hands: Array.isArray(st.hands) ? st.hands : [],
-      ledger: Array.isArray(st.ledger) ? st.ledger : [],
-      startedAt: st.startedAt || Date.now(),
-    };
-  }
-  function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable; app still works */ }
-  }
-  let state = load();
 
-  // ---------- scoring engine ----------
-  function isDoubled(suit, s) { return !!suit && s.doubleSuits.includes(suit); }
-
-  // Hand = { knocker: 0|1, type: 'knock'|'gin', kn: knocker deadwood, opp: other deadwood, suit }
   function scoreHand(h, s) {
-    const k = h.knocker, o = 1 - k;
     let winner, pts, bonusBoxes, kind;
     if (h.type === 'gin') {
-      winner = k; pts = h.opp + s.ginBonus; bonusBoxes = s.ginBoxes; kind = 'gin';
+      winner = h.knocker; pts = h.opp + s.ginBonus; bonusBoxes = s.ginBoxes; kind = 'gin';
     } else if (h.opp > h.kn) {
-      winner = k; pts = h.opp - h.kn; bonusBoxes = 0; kind = 'knock';
+      winner = h.knocker; pts = h.opp - h.kn; bonusBoxes = 0; kind = 'knock';
     } else {
       // Undercut (ties go to the defender too): difference + undercut bonus.
-      winner = o; pts = (h.kn - h.opp) + s.undercutBonus; bonusBoxes = s.undercutBoxes; kind = 'undercut';
+      winner = 1 - h.knocker; pts = h.kn - h.opp + s.undercutBonus; bonusBoxes = s.undercutBoxes; kind = 'undercut';
     }
-    const dbl = isDoubled(h.suit, s);
+    const dbl = !!h.suit && s.doubleSuits.includes(h.suit);
     const m = dbl ? 2 : 1;
     return { winner, kind, dbl, pts: pts * m, bonusBoxes: bonusBoxes * m, boxes: ((s.handBox ? 1 : 0) + bonusBoxes) * m };
   }
 
-  // Replay all hands into the three columns.
-  // A win goes into every open column the winner has already entered, plus the next open
-  // column they haven't entered yet (1st win: G1, 2nd: G1+G2, 3rd on: all three).
+  // Replay all hands into the three games. A win goes into every open game the winner has
+  // already entered, plus the next open game they haven't (1st win: G1, 2nd: G1+G2, 3rd on: all).
   function compute(hands, s) {
     const cols = [0, 1, 2].map(() => ({ score: [0, 0], boxes: [0, 0], closed: false, winner: null, closedAt: null }));
     const entered = [[false, false, false], [false, false, false]];
-    const rows = [];
-    hands.forEach((h, idx) => {
+    const rows = hands.map((h, idx) => {
       const r = scoreHand(h, s);
       const w = r.winner;
       const hit = [];
@@ -513,329 +414,254 @@
         else if (!opened) { entered[w][c] = true; opened = true; hit.push(c); }
       }
       const closedNow = [];
-      hit.forEach(c => { cols[c].score[w] += r.pts; cols[c].boxes[w] += r.boxes; });
-      hit.forEach(c => {
-        if (cols[c].score[w] >= s.target) { cols[c].closed = true; cols[c].winner = w; cols[c].closedAt = idx; closedNow.push(c); }
-      });
-      rows.push({ h, r, hit, closedNow, totals: cols.map(c => [...c.score]) });
+      for (const c of hit) {
+        const col = cols[c];
+        col.score[w] += r.pts;
+        col.boxes[w] += r.boxes;
+        if (col.score[w] >= s.target) { col.closed = true; col.winner = w; col.closedAt = idx; closedNow.push(c); }
+      }
+      return { h, r, hit, closedNow, totals: cols.map(col => [...col.score]) };
     });
-    return { cols, rows, over: cols.every(c => c.closed) };
+    return { cols, rows, over: cols.every(col => col.closed) };
   }
 
-  // Value of a finished column, from the winner's point of view.
+  // What game c is worth to `winner` (the actual winner once it's closed).
   function colValue(col, c, s, winner = col.winner) {
     const W = winner, L = 1 - W;
-    const diff = col.score[W] - col.score[L];
+    const score = col.score[W];
+    const diff = score - col.score[L];
     const boxDiff = col.boxes[W] - col.boxes[L];
-    const base = col.score[W] + s.gameBonus + diff + boxDiff * s.boxValue;
+    const base = score + s.gameBonus + diff + boxDiff * s.boxValue;
     const shutout = s.shutoutDouble && col.score[L] === 0;
     const triple = c === 2 && s.col3Double;
-    const value = base * (shutout ? 2 : 1) * (triple ? 2 : 1);
-    return { W, diff, boxDiff, base, shutout, triple, value };
+    return { W, score, diff, boxDiff, base, shutout, triple, value: base * (shutout ? 2 : 1) * (triple ? 2 : 1) };
   }
 
-  function settle(res, s, projected) {
-    let net = 0; // positive = player 0 is owed
+  // net: finished games only. projNet: also counts games in progress as won by whoever leads.
+  // Both are positive when player 1 (index 0) is owed.
+  function settle(res, s) {
+    let net = 0, projNet = 0;
     const parts = res.cols.map((col, c) => {
-      if (col.closed) {
-        const v = colValue(col, c, s);
-        net += v.W === 0 ? v.value : -v.value;
-        return { c, final: true, ...v };
-      }
-      if (!projected || col.score[0] === col.score[1]) return { c, final: false, W: null };
-      const lead = col.score[0] > col.score[1] ? 0 : 1;
+      const lead = col.closed ? col.winner : col.score[0] === col.score[1] ? null : col.score[0] > col.score[1] ? 0 : 1;
+      if (lead === null) return { c, final: false, W: null };
       const v = colValue(col, c, s, lead);
-      return { c, final: false, projectedOnly: true, ...v };
+      const signed = lead === 0 ? v.value : -v.value;
+      projNet += signed;
+      if (col.closed) net += signed;
+      return { c, final: col.closed, ...v };
     });
-    let projNet = net;
-    parts.forEach(p => { if (p.projectedOnly) projNet += p.W === 0 ? p.value : -p.value; });
     return { parts, net, projNet };
   }
+
   function roundPts(n, s) {
     const r = Number(s.rounding) || 0;
-    const a = Math.abs(n);
-    return r ? Math.round(a / r) * r : a;
+    return r ? Math.round(Math.abs(n) / r) * r : Math.abs(n);
   }
-  function dollars(pts, s) { return pts * s.cents / 100; }
+  const dollars = (pts, s) => pts * s.cents / 100;
+
+  return { DEFAULTS, checkHand, scoreHand, compute, colValue, settle, roundPts, dollars };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+  const { DEFAULTS, checkHand, compute, colValue, settle, roundPts, dollars } = GinEngine;
+  const KEY = 'rummytalk-score-v1';
+  const SUIT = { S: '♠', H: '♥', D: '♦', C: '♣' };
+  const $ = id => document.getElementById(id);
+
+  // ---------- saved state ----------
+  // Ledger entry = { endedAt, players, hands (count), points (signed, rounded), dollars (signed) }; positive = player 1 won.
+  const blank = () => ({ players: ['Player 1', 'Player 2'], settings: { ...DEFAULTS }, hands: [], ledger: [] });
+  function normalize(st) {
+    const base = blank();
+    return {
+      players: Array.isArray(st.players) && st.players.length === 2 ? st.players.map(String) : base.players,
+      settings: { ...DEFAULTS, ...(st.settings || {}) },
+      hands: Array.isArray(st.hands) ? st.hands : [],
+      ledger: Array.isArray(st.ledger) ? st.ledger : [],
+    };
+  }
+  const storageOk = (() => {
+    try { localStorage.setItem(KEY + '-probe', '1'); localStorage.removeItem(KEY + '-probe'); return true; } catch (e) { return false; }
+  })();
+  const saved = storageOk ? localStorage.getItem(KEY) : null;
+  const firstRun = storageOk && saved === null;
+  let state = blank();
+  if (saved) { try { state = normalize(JSON.parse(saved)); } catch (e) { /* unreadable save: start fresh */ } }
+  function save() {
+    if (storageOk) { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage full */ } }
+  }
+
+  // ---------- helpers ----------
   const fmt$ = n => '$' + n.toFixed(2);
   const fmtN = n => n.toLocaleString('en-US');
-
-  // ---------- rendering helpers ----------
-  const $ = id => document.getElementById(id);
+  const plural = (n, word, many = word + 's') => `${n} ${n === 1 ? word : many}`;
   const esc = str => String(str).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
   const pname = i => esc(state.players[i]);
   const pspan = i => `<span class="p${i}c">${pname(i)}</span>`;
   const gameName = c => `Game ${c + 1}`;
-
-  function describe(row) {
-    const { h, r } = row;
-    let t;
-    if (r.kind === 'gin') t = `${pname(r.winner)} gin`;
-    else if (r.kind === 'knock') t = `${pname(r.winner)} knock`;
-    else t = `${pname(r.winner)} undercut`;
-    const suit = h.suit ? ` ${SUIT[h.suit]}` : '';
-    return t + (r.dbl ? ` <span class="dbl">${suit} ×2</span>` : suit);
+  function owesText(net) {
+    const pts = roundPts(net, state.settings);
+    if (pts === 0) return { pts, text: 'Even. Nobody owes anything.' };
+    const w = net > 0 ? 0 : 1;
+    return { pts, text: `${pspan(1 - w)} owes ${pspan(w)} <span class="num">${fmt$(dollars(pts, state.settings))}</span>` };
   }
 
-  // ---------- columns ----------
-  function renderColumns(res) {
+  // ---------- rendering ----------
+  let res; // the current game, recomputed by render()
+
+  function render() {
+    res = compute(state.hands, state.settings);
+    const st = settle(res, state.settings);
+    renderOver(st);
+    renderColumns();
+    renderSheet();
+    renderSettle(st);
+    renderLedger();
+    syncForm();
+    $('btnUndo').disabled = !state.hands.length;
+  }
+
+  function renderOver(st) {
+    $('overBanner').innerHTML = res.over
+      ? `<div class="over"><div><div class="big">Game over</div><div>${owesText(st.net).text}</div></div><button type="button" id="btnArchive">Save to ledger &amp; start next game</button></div>`
+      : '';
+    if (res.over) $('btnArchive').onclick = archiveGame;
+  }
+
+  function renderColumns() {
     const s = state.settings;
     $('columns').innerHTML = res.cols.map((col, c) => {
-      const badges = [];
-      if (c === 2 && s.col3Double) badges.push('<span class="badge gold"><span class="long">counts </span>×2</span>');
-      if (col.closed) badges.push('<span class="badge">final</span>');
-      const pl = [0, 1].map(p => {
-        const pct = Math.min(100, (col.score[p] / s.target) * 100);
-        return `<div class="pl p${p}">
+      const badges = (c === 2 && s.col3Double ? '<span class="badge gold"><span class="long">counts </span>×2</span>' : '')
+        + (col.closed ? '<span class="badge">final</span>' : '');
+      const players = [0, 1].map(p => `<div class="pl p${p}">
           <span class="nm">${pname(p)}</span><span class="pts num">${fmtN(col.score[p])}</span>
-          <span class="bx"><span class="bar"><i style="width:${pct}%"></i></span><span class="num">${col.boxes[p]} box${col.boxes[p] === 1 ? '' : 'es'}</span></span>
-        </div>`;
-      }).join('');
+          <span class="bx"><span class="bar"><i style="width:${Math.min(100, col.score[p] / s.target * 100)}%"></i></span><span class="num">${plural(col.boxes[p], 'box', 'boxes')}</span></span>
+        </div>`).join('');
       let status;
       if (col.closed) {
         const v = colValue(col, c, s);
         status = `${pspan(v.W)} won${v.shutout ? ' (shutout)' : ''} · <b class="num">${fmtN(v.value)}</b>`;
-      } else if (col.score[0] === 0 && col.score[1] === 0) {
+      } else if (!col.score[0] && !col.score[1]) {
         status = `First to ${fmtN(s.target)}`;
       } else {
         const d = col.score[0] - col.score[1];
-        const lead = d > 0 ? 0 : 1;
-        const need = s.target - Math.max(col.score[0], col.score[1]);
-        status = d === 0 ? `All square · ${need} to go` : `${pspan(lead)} +${Math.abs(d)} · needs ${need}`;
+        const need = s.target - Math.max(...col.score);
+        status = d === 0 ? `All square · ${need} to go` : `${pspan(d > 0 ? 0 : 1)} +${Math.abs(d)} · needs ${need}`;
       }
       return `<article class="col-card${col.closed ? ' closed' : ''}">
-        <div class="col-head"><span class="t">${gameName(c)}</span>${badges.join('')}</div>
-        ${pl}
+        <div class="col-head"><span class="t">${gameName(c)}</span>${badges}</div>
+        ${players}
         <div class="col-status">${status}</div>
       </article>`;
     }).join('');
   }
 
-  // ---------- score sheet ----------
-  function renderSheet(res) {
-    const tbl = $('sheet');
-    $('handCount').textContent = res.rows.length ? `· ${res.rows.length} hand${res.rows.length === 1 ? '' : 's'}` : '';
+  function renderSheet() {
+    $('handCount').textContent = res.rows.length ? `· ${plural(res.rows.length, 'hand')}` : '';
     const head = `<thead>
-      <tr><th></th><th colspan="3" class="p0h first-of-player" style="text-align:center">${pname(0)}</th><th colspan="3" class="p1h first-of-player" style="text-align:center">${pname(1)}</th><th></th><th></th></tr>
-      <tr><th style="text-align:left">#</th>${[0, 1].map(() => [0, 1, 2].map(c => `<th class="${c === 0 ? 'first-of-player' : ''}">G${c + 1}</th>`).join('')).join('')}<th style="text-align:left">Hand</th><th></th></tr>
+      <tr><th></th><th colspan="3" class="p0h split">${pname(0)}</th><th colspan="3" class="p1h split">${pname(1)}</th><th></th><th></th></tr>
+      <tr><th class="left">#</th>${'<th class="split">G1</th><th>G2</th><th>G3</th>'.repeat(2)}<th class="left">Hand</th><th></th></tr>
     </thead>`;
     if (!res.rows.length) {
-      tbl.innerHTML = head + `<tbody><tr><td colspan="9" class="empty">No hands yet. Record the first one to start.</td></tr></tbody>`;
+      $('sheet').innerHTML = head + '<tbody><tr><td colspan="9" class="empty">No hands yet. Record the first one to start.</td></tr></tbody>';
       return;
     }
-    // Track when each column closed so later cells render as "dead".
     const body = res.rows.map((row, i) => {
+      const { r } = row;
       const cells = [0, 1].map(p => [0, 1, 2].map(c => {
-        const cls = [c === 0 ? 'first-of-player' : ''];
-        const col = res.cols[c];
-        const deadBefore = col.closed && col.closedAt < i;
-        if (row.r.winner === p && row.hit.includes(c)) {
+        const cls = c === 0 ? ['split'] : [];
+        if (r.winner === p && row.hit.includes(c)) {
           cls.push('win', `p${p}`);
           if (row.closedNow.includes(c)) cls.push('closer');
-          const circ = row.r.bonusBoxes ? `<span class="circ" title="${row.r.bonusBoxes} bonus box${row.r.bonusBoxes === 1 ? '' : 'es'}">${row.r.bonusBoxes}</span>` : '';
-          return `<td class="${cls.join(' ')}"><span class="run">${fmtN(row.totals[c][p])}</span>${circ}<span class="add">+${row.r.pts}</span></td>`;
+          const circ = r.bonusBoxes ? `<span class="circ" title="${plural(r.bonusBoxes, 'bonus box', 'bonus boxes')}">${r.bonusBoxes}</span>` : '';
+          return `<td class="${cls.join(' ')}"><span class="run">${fmtN(row.totals[c][p])}</span>${circ}<span class="add">+${r.pts}</span></td>`;
         }
-        if (deadBefore) cls.push('dead');
+        if (res.cols[c].closed && res.cols[c].closedAt < i) cls.push('dead');
         return `<td class="${cls.join(' ')}"></td>`;
       }).join('')).join('');
-      return `<tr><td class="idx">${i + 1}</td>${cells}<td class="desc">${describe(row)}</td><td><button class="del" data-del="${i}" aria-label="Delete hand ${i + 1}" title="Delete this hand">×</button></td></tr>`;
+      const suit = row.h.suit ? ` ${SUIT[row.h.suit]}` : '';
+      const desc = `${pname(r.winner)} ${r.kind}${r.dbl ? ` <span class="dbl">${suit} ×2</span>` : suit}`;
+      return `<tr><td class="idx left">${i + 1}</td>${cells}<td class="desc left">${desc}</td><td><button type="button" class="del" data-del="${i}" aria-label="Delete hand ${i + 1}" title="Delete this hand">×</button></td></tr>`;
     }).join('');
-    tbl.innerHTML = head + `<tbody>${body}</tbody>`;
+    $('sheet').innerHTML = head + `<tbody>${body}</tbody>`;
   }
 
-  // ---------- settlement ----------
   function mathLine(v, s) {
-    let t = `${fmtN(v.base - s.gameBonus - v.diff - v.boxDiff * s.boxValue)} + ${fmtN(s.gameBonus)} game + ${fmtN(v.diff)} diff ${v.boxDiff < 0 ? '−' : '+'} ${Math.abs(v.boxDiff)} box${Math.abs(v.boxDiff) === 1 ? '' : 'es'} × ${s.boxValue} = ${fmtN(v.base)}`;
+    const sign = v.boxDiff < 0 ? '−' : '+';
+    let t = `${fmtN(v.score)} + ${fmtN(s.gameBonus)} game + ${fmtN(v.diff)} diff ${sign} ${plural(Math.abs(v.boxDiff), 'box', 'boxes')} × ${s.boxValue} = ${fmtN(v.base)}`;
     if (v.shutout) t += ' · ×2 shutout';
     if (v.triple) t += ' · ×2 game 3';
     return t;
   }
-  function owesLine(net, s) {
-    const pts = roundPts(net, s);
-    if (pts === 0) return { pts, text: 'Even. Nobody owes anything.' };
-    const winner = net > 0 ? 0 : 1;
-    return { pts, winner, text: `${pspan(1 - winner)} owes ${pspan(winner)} <span class="num">${fmt$(dollars(pts, s))}</span>` };
-  }
-  function renderSettle(res) {
+
+  function renderSettle(st) {
     const s = state.settings;
-    const st = settle(res, s, true);
     const rows = st.parts.map(p => {
       if (p.final) {
         return `<div class="settle-row"><span class="g">${gameName(p.c)}</span><span class="who">${pspan(p.W)}</span><span class="v num">${fmtN(p.value)}</span><span class="math num">${mathLine(p, s)}</span></div>`;
       }
-      if (p.projectedOnly) {
+      if (p.W !== null) {
         return `<div class="settle-row pending"><span class="g">${gameName(p.c)}</span><span class="who">${pname(p.W)} leading</span><span class="v num">~${fmtN(p.value)}</span><span class="math num">If it ended now: ${mathLine(p, s)}</span></div>`;
       }
-      return `<div class="settle-row pending"><span class="g">${gameName(p.c)}</span><span class="who">not started</span><span class="v">—</span></div>`;
+      return `<div class="settle-row pending"><span class="g">${gameName(p.c)}</span><span class="who">${res.cols[p.c].score[0] ? 'tied' : 'not started'}</span><span class="v">—</span></div>`;
     }).join('');
 
     let total;
     if (res.over) {
-      const o = owesLine(st.net, s);
-      total = `<div class="total">
-        <div class="line"><span>Net points</span><span class="num">${fmtN(Math.abs(st.net))}${s.rounding ? ` → ${fmtN(o.pts)}` : ''}</span></div>
+      const o = owesText(st.net);
+      total = `<div class="line"><span>Net points</span><span class="num">${fmtN(Math.abs(st.net))}${s.rounding ? ` → ${fmtN(o.pts)}` : ''}</span></div>
         <div class="money">${o.text}</div>
-        <div class="sub">${s.cents}¢ per point${s.rounding ? `, rounded to nearest ${s.rounding}` : ''}</div>
-      </div>`;
+        <div class="sub">${s.cents}¢ per point${s.rounding ? `, rounded to nearest ${s.rounding}` : ''}</div>`;
     } else if (!res.rows.length) {
-      total = `<div class="total"><div class="sub">Stakes: ${s.cents}¢ per point. Each finished game is worth its winner's score + ${s.gameBonus} game bonus + the point difference + ${s.boxValue} per box ahead.</div></div>`;
+      total = `<div class="sub">Stakes: ${s.cents}¢ per point. Each finished game is worth its winner's score + ${s.gameBonus} game bonus + the point difference + ${s.boxValue} per box ahead.</div>`;
     } else {
-      const o = owesLine(st.projNet, s);
-      total = `<div class="total">
-        <div class="line"><span>If everything ended now</span><span class="num">${fmtN(o.pts)} pts</span></div>
-        <div class="money" style="font-size:18px">${o.text}</div>
-        <div class="sub">Projection only. Games in progress are counted as won by whoever leads.</div>
-      </div>`;
+      const o = owesText(st.projNet);
+      total = `<div class="line"><span>If everything ended now</span><span class="num">${fmtN(o.pts)} pts</span></div>
+        <div class="money soft">${o.text}</div>
+        <div class="sub">Estimate only. Games still in play are counted as won by whoever leads.</div>`;
     }
-    $('settleBody').innerHTML = rows + total;
+    $('settleBody').innerHTML = `${rows}<div class="total">${total}</div>`;
   }
 
-  function renderOver(res) {
-    const el = $('overBanner');
-    if (!res.over) { el.innerHTML = ''; return; }
-    const s = state.settings;
-    const st = settle(res, s, false);
-    const o = owesLine(st.net, s);
-    el.innerHTML = `<div class="over"><div><div class="big">Game over</div><div>${o.text.replace(/class="p\dc"/g, '')}</div></div><button id="btnArchive">Save to ledger &amp; start next game</button></div>`;
-    $('btnArchive').onclick = archiveGame;
-  }
-
-  // ---------- ledger ----------
   function renderLedger() {
-    const s = state.settings;
     const L = state.ledger;
-    let bal = 0;
-    L.forEach(g => { bal += g.dollars; }); // positive = player 0 is up
-    const balTxt = L.length === 0
-      ? '<span style="color:var(--muted);font-weight:400;font-size:14px">Finished games are saved here with a running balance.</span>'
+    const bal = L.reduce((sum, g) => sum + g.dollars, 0);
+    const balTxt = !L.length ? '<span class="muted">Finished games are saved here with a running balance.</span>'
       : Math.abs(bal) < 0.005 ? 'All square overall.'
       : `${pspan(bal > 0 ? 1 : 0)} owes ${pspan(bal > 0 ? 0 : 1)} <span class="num">${fmt$(Math.abs(bal))}</span> overall`;
     const list = L.slice().reverse().map(g => {
-      const d = new Date(g.endedAt);
+      const date = new Date(g.endedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
       const who = g.dollars === 0 ? 'Even' : `${esc(g.players[g.dollars > 0 ? 0 : 1])} +${fmt$(Math.abs(g.dollars))}`;
-      return `<li><span>${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} · ${g.hands} hands</span><span class="num">${who}</span></li>`;
+      return `<li><span>${date} · ${plural(g.hands, 'hand')}</span><span class="num">${who}</span></li>`;
     }).join('');
     $('ledgerBody').innerHTML = `<div class="balance">${balTxt}</div>${list ? `<ul class="games">${list}</ul>` : ''}`;
-    void s;
+    $('btnClearLedger').disabled = !L.length;
   }
 
+  // ---------- game actions ----------
   function archiveGame() {
-    const s = state.settings;
-    const res = compute(state.hands, s);
     if (!res.over) return;
-    const st = settle(res, s, false);
-    const pts = roundPts(st.net, s);
-    const signed = st.net >= 0 ? pts : -pts;
+    const s = state.settings;
+    const { net } = settle(res, s);
+    const points = Math.sign(net) * roundPts(net, s);
     state.ledger.push({
-      endedAt: Date.now(), startedAt: state.startedAt, players: [...state.players],
-      hands: state.hands.length, netPoints: st.net, roundedPoints: signed,
-      dollars: Math.round(dollars(signed, s) * 100) / 100,
-      columns: st.parts.map(p => ({ winner: p.W, value: p.value })),
-      handLog: state.hands, settings: { ...s },
+      endedAt: Date.now(), players: [...state.players], hands: state.hands.length,
+      points, dollars: Math.round(dollars(points, s) * 100) / 100,
     });
     state.hands = [];
-    state.startedAt = Date.now();
     save(); resetForm(); render();
   }
 
-  // ---------- entry form ----------
-  const form = { knocker: null, type: 'knock', suit: null };
-
-  function setPressed(groupId, v) {
-    $(groupId).querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === String(v))));
-  }
-  function readHand() {
-    if (form.knocker === null) return { err: 'Pick who knocked or went gin.' };
-    const oppRaw = $('inOpp').value.trim();
-    const knRaw = $('inKn').value.trim();
-    if (oppRaw === '') return { err: form.type === 'gin' ? "Enter the other player's deadwood." : "Enter the other player's deadwood after lay-offs." };
-    const opp = Number(oppRaw);
-    if (!Number.isInteger(opp) || opp < 0) return { err: 'Deadwood must be a whole number, 0 or more.' };
-    let kn = 0;
-    if (form.type === 'knock') {
-      if (knRaw === '') return { err: "Enter the knocker's deadwood." };
-      kn = Number(knRaw);
-      if (!Number.isInteger(kn) || kn < 0) return { err: 'Deadwood must be a whole number, 0 or more.' };
-      if (kn === 0) return { err: 'Zero deadwood is gin. Switch "How?" to Gin.' };
-    }
-    return { hand: { knocker: form.knocker, type: form.type, kn, opp, suit: form.suit } };
-  }
-  function updatePreview() {
-    const s = state.settings;
-    const res0 = compute(state.hands, s);
-    const pv = $('preview');
-    pv.classList.remove('warn');
-    if (res0.over) {
-      pv.innerHTML = 'All three games are finished. Save to the ledger to start the next one.';
-      $('btnRecord').disabled = true;
-      return;
-    }
-    const { hand, err } = readHand();
-    if (!hand) {
-      pv.innerHTML = err;
-      $('btnRecord').disabled = true;
-      return;
-    }
-    const res = compute([...state.hands, hand], s);
-    const row = res.rows[res.rows.length - 1];
-    const r = row.r;
-    const kindTxt = r.kind === 'gin' ? 'Gin!' : r.kind === 'knock' ? 'Knock' : (hand.kn === hand.opp ? 'Tie, which counts as an undercut' : 'Undercut!');
-    const games = row.hit.map(c => `G${c + 1}`).join(', ');
-    const closes = row.closedNow.length ? ` · <b>wins ${row.closedNow.map(gameName).join(' & ')}</b>` : '';
-    pv.innerHTML = `<div class="big">${pspan(r.winner)} <b>+${r.pts}</b>${r.dbl ? ' <span class="dbl">(doubled)</span>' : ''}</div>
-      <div>${kindTxt} · ${r.boxes} box${r.boxes === 1 ? '' : 'es'} · goes in ${games}${closes}</div>`;
-    $('btnRecord').disabled = false;
-  }
-  function syncFormUI() {
-    const s = state.settings;
-    const btns = $('segKnocker').querySelectorAll('button');
-    btns[0].textContent = state.players[0];
-    btns[1].textContent = state.players[1];
-    setPressed('segKnocker', form.knocker);
-    setPressed('segType', form.type);
-    setPressed('segSuit', form.suit);
-    $('fKn').style.display = form.type === 'gin' ? 'none' : '';
-    $('lblOpp').innerHTML = form.type === 'gin'
-      ? `Other player's deadwood`
-      : `Other player's deadwood <small>(after lay-offs)</small>`;
-    const ds = s.doubleSuits.split('').map(k => SUIT[k]).join(' or ');
-    $('dblNote').textContent = ds ? `${ds} knock card doubles the hand's points and boxes.` : 'Suit doubling is off in Settings.';
-    updatePreview();
-  }
-  function resetForm() {
-    form.knocker = null; form.type = 'knock'; form.suit = null;
-    $('inKn').value = ''; $('inOpp').value = '';
-  }
-
-  $('segKnocker').addEventListener('click', e => {
-    const b = e.target.closest('button'); if (!b) return;
-    form.knocker = Number(b.dataset.v); syncFormUI();
-    (form.type === 'knock' ? $('inKn') : $('inOpp')).focus();
+  $('btnNew').addEventListener('click', () => {
+    if (res.over) { if (confirm('Save the finished game to the ledger and start a new one?')) archiveGame(); return; }
+    if (state.hands.length && !confirm("Throw away the game in progress and start over? It won't be saved to the ledger.")) return;
+    state.hands = []; save(); resetForm(); render();
   });
-  $('segType').addEventListener('click', e => {
-    const b = e.target.closest('button'); if (!b) return;
-    form.type = b.dataset.v; syncFormUI();
-  });
-  $('segSuit').addEventListener('click', e => {
-    const b = e.target.closest('button'); if (!b) return;
-    form.suit = form.suit === b.dataset.v ? null : b.dataset.v; syncFormUI();
-  });
-  $('inKn').addEventListener('input', updatePreview);
-  $('inOpp').addEventListener('input', updatePreview);
-  $('inKn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('inOpp').focus(); } });
-  $('inOpp').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); record(); } });
-
-  function record() {
-    const { hand } = readHand();
-    if (!hand || compute(state.hands, state.settings).over) return;
-    hand.at = Date.now();
-    state.hands.push(hand);
-    save(); resetForm(); render();
-  }
-  $('btnRecord').addEventListener('click', record);
   $('btnUndo').addEventListener('click', () => {
-    if (!state.hands.length) return;
-    if (!confirm('Remove the last hand?')) return;
+    if (!state.hands.length || !confirm('Remove the last hand?')) return;
     state.hands.pop(); save(); render();
   });
   $('sheet').addEventListener('click', e => {
@@ -844,13 +670,81 @@
     if (!confirm(`Delete hand ${i + 1}? Every score after it is recalculated.`)) return;
     state.hands.splice(i, 1); save(); render();
   });
-
-  $('btnNew').addEventListener('click', () => {
-    const res = compute(state.hands, state.settings);
-    if (res.over) { if (confirm('Save the finished game to the ledger and start a new one?')) archiveGame(); return; }
-    if (state.hands.length && !confirm('Throw away the game in progress and start over? It won\'t be saved to the ledger.')) return;
-    state.hands = []; state.startedAt = Date.now(); save(); resetForm(); render();
+  $('btnClearLedger').addEventListener('click', () => {
+    if (!confirm('Clear every saved game and set the overall balance back to $0.00? This can\'t be undone. Export a backup first if you want a record.')) return;
+    state.ledger = []; save(); render();
   });
+
+  // ---------- hand entry ----------
+  const form = { knocker: null, type: 'knock', suit: null };
+
+  function setPressed(groupId, v) {
+    $(groupId).querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === String(v))));
+  }
+  function readHand() {
+    if (form.knocker === null) return { err: 'Pick who knocked or went gin.' };
+    const knRaw = $('inKn').value.trim();
+    const oppRaw = $('inOpp').value.trim();
+    if (form.type === 'knock' && knRaw === '') return { err: "Enter the knocker's deadwood." };
+    if (oppRaw === '') return { err: form.type === 'gin' ? "Enter the other player's deadwood." : "Enter the other player's deadwood after lay-offs." };
+    const hand = { knocker: form.knocker, type: form.type, kn: form.type === 'gin' ? 0 : Number(knRaw), opp: Number(oppRaw), suit: form.suit };
+    const err = checkHand(hand);
+    return err ? { err } : { hand };
+  }
+  function updatePreview() {
+    const pv = $('preview');
+    const { hand, err } = res.over ? { err: 'All three games are finished. Save to the ledger to start the next one.' } : readHand();
+    $('btnRecord').disabled = !hand;
+    if (!hand) { pv.textContent = err; return; }
+    const rows = compute([...state.hands, hand], state.settings).rows;
+    const { r, hit, closedNow } = rows[rows.length - 1];
+    const kind = { gin: 'Gin!', knock: 'Knock', undercut: hand.kn === hand.opp ? 'Tie, which counts as an undercut' : 'Undercut!' }[r.kind];
+    const wins = closedNow.length ? ` · <b>wins ${closedNow.map(gameName).join(' & ')}</b>` : '';
+    pv.innerHTML = `<div class="big">${pspan(r.winner)} <b>+${r.pts}</b>${r.dbl ? ' <span class="dbl">(doubled)</span>' : ''}</div>
+      <div>${kind} · ${plural(r.boxes, 'box', 'boxes')} · goes in ${hit.map(c => `G${c + 1}`).join(', ')}${wins}</div>`;
+  }
+  function syncForm() {
+    const btns = $('segKnocker').querySelectorAll('button');
+    btns[0].textContent = state.players[0];
+    btns[1].textContent = state.players[1];
+    setPressed('segKnocker', form.knocker);
+    setPressed('segType', form.type);
+    setPressed('segSuit', form.suit);
+    $('fKn').hidden = form.type === 'gin';
+    $('lblOpp').innerHTML = form.type === 'gin' ? "Other player's deadwood" : "Other player's deadwood <small>(after lay-offs)</small>";
+    const ds = state.settings.doubleSuits.split('').map(k => SUIT[k]).join(' or ');
+    $('dblNote').textContent = ds ? `${ds} knock card doubles the hand's points and boxes.` : 'Suit doubling is turned off in Settings.';
+    updatePreview();
+  }
+  function resetForm() {
+    form.knocker = null; form.type = 'knock'; form.suit = null;
+    $('inKn').value = ''; $('inOpp').value = '';
+  }
+  function record() {
+    const { hand } = readHand();
+    if (!hand || res.over) return;
+    state.hands.push(hand);
+    save(); resetForm(); render();
+  }
+
+  $('segKnocker').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    form.knocker = Number(b.dataset.v); syncForm();
+    (form.type === 'knock' ? $('inKn') : $('inOpp')).focus();
+  });
+  $('segType').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    form.type = b.dataset.v; syncForm();
+  });
+  $('segSuit').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    form.suit = form.suit === b.dataset.v ? null : b.dataset.v; syncForm();
+  });
+  $('inKn').addEventListener('input', updatePreview);
+  $('inOpp').addEventListener('input', updatePreview);
+  $('inKn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('inOpp').focus(); } });
+  $('inOpp').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); record(); } });
+  $('btnRecord').addEventListener('click', record);
 
   // ---------- settings ----------
   const dlg = $('settingsDlg');
@@ -864,12 +758,19 @@
     sf.doubleSuits.value = s.doubleSuits;
     sf.rounding.value = String(s.rounding);
   }
-  $('btnSettings').addEventListener('click', () => { fillSettings(state.settings, state.players); dlg.showModal(); });
+  function openSettings(welcome) {
+    fillSettings(state.settings, state.players);
+    $('welcome').hidden = !welcome;
+    dlg.showModal();
+    if (welcome) sf.p0.select();
+  }
+  $('btnSettings').addEventListener('click', () => openSettings(false));
   $('btnCancel').addEventListener('click', () => dlg.close());
   $('btnDefaults').addEventListener('click', () => fillSettings(DEFAULTS, [sf.p0.value, sf.p1.value]));
   sf.addEventListener('submit', () => {
     const s = { ...state.settings };
-    NUMS.forEach(k => { const v = Number(sf[k].value); if (Number.isFinite(v) && v >= 0) s[k] = v; });
+    // A blank or invalid box keeps its old value rather than becoming 0.
+    NUMS.forEach(k => { const raw = sf[k].value.trim(); const v = Number(raw); if (raw !== '' && Number.isFinite(v) && v >= 0) s[k] = v; });
     if (s.target < 1) s.target = DEFAULTS.target;
     BOOLS.forEach(k => { s[k] = sf[k].checked; });
     s.doubleSuits = sf.doubleSuits.value;
@@ -881,9 +782,8 @@
 
   // ---------- backup ----------
   $('btnExport').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }));
     a.download = `gin-scores-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
@@ -894,76 +794,31 @@
     if (!f) return;
     try {
       const st = JSON.parse(await f.text());
-      if (!st || !Array.isArray(st.hands)) throw new Error('Not a scorekeeper backup');
-      if (!confirm(`Replace everything here with this backup (${st.hands.length} hands in progress, ${(st.ledger || []).length} saved games)?`)) return;
+      if (!st || !Array.isArray(st.hands)) throw new Error("it isn't a Gin Scorekeeper backup.");
+      const bad = st.hands.findIndex(h => checkHand(h));
+      if (bad >= 0) throw new Error(`hand ${bad + 1} in it is damaged (${checkHand(st.hands[bad])}).`);
+      if ((st.ledger || []).some(g => typeof g.dollars !== 'number' || !Array.isArray(g.players))) throw new Error('its ledger is damaged.');
+      if (!confirm(`Replace everything here with this backup (${plural(st.hands.length, 'hand')} in progress, ${plural((st.ledger || []).length, 'saved game')})?`)) return;
       state = normalize(st); save(); resetForm(); render();
-    } catch (err) { alert('Could not read that file: ' + err.message); }
+    } catch (err) { alert("Couldn't use that file: " + (err instanceof SyntaxError ? "it isn't a Gin Scorekeeper backup." : err.message)); }
   });
 
-  // ---------- main render ----------
-  function render() {
-    const res = compute(state.hands, state.settings);
-    renderOver(res);
-    renderColumns(res);
-    renderSheet(res);
-    renderSettle(res);
-    renderLedger();
-    syncFormUI();
-    $('btnUndo').disabled = !state.hands.length;
-  }
+  // ---------- start ----------
   render();
 
-  // Warn when scores can't be kept: opened from inside a zip (Windows runs it from a
-  // throwaway Temp folder) or the browser blocks storage.
-  (() => {
-    let where = '';
-    try { where = decodeURIComponent(location.href); } catch (e) { where = location.href; }
-    let storageOk = true;
-    try { localStorage.setItem(KEY + '-probe', '1'); localStorage.removeItem(KEY + '-probe'); } catch (e) { storageOk = false; }
-    let msg = '';
-    if (location.protocol === 'file:' && /\.zip[\/]/i.test(where)) {
-      msg = '<b>Scores will be lost. You opened this from inside the zip file.</b>Close this window, right-click the zip file, choose <i>Extract All</i>, and open the extracted copy instead.';
-    } else if (!storageOk) {
-      msg = '<b>This browser is not saving scores.</b>Private or incognito windows, and some phone file viewers, forget everything when closed. Open the file in a normal Chrome, Edge or Safari window.';
-    }
-    $('warnBanner').innerHTML = msg ? `<div class="warnbar" role="alert">${msg}</div>` : '';
-  })();
+  // Warn when scores can't be kept: running from inside a zip (Windows unpacks it to a
+  // throwaway Temp folder) or a browser that blocks storage (private windows, file viewers).
+  let where = location.href;
+  try { where = decodeURIComponent(where); } catch (e) { /* keep raw */ }
+  let warn = '';
+  if (location.protocol === 'file:' && /\.zip\/|\/AppData\/Local\/Temp\//i.test(where)) {
+    warn = '<b>Scores will be lost. You opened this from inside the zip file.</b>Close this window, right-click the zip file, choose <i>Extract All</i>, and open the extracted copy instead.';
+  } else if (!storageOk) {
+    warn = '<b>This browser is not saving scores.</b>Private or incognito windows, and some phone file viewers, forget everything when closed. Open it in a normal Chrome, Edge or Safari window.';
+  }
+  $('warnBanner').innerHTML = warn ? `<div class="warnbar" role="alert">${warn}</div>` : '';
 
-  if (firstRun) { fillSettings(state.settings, state.players); dlg.showModal(); setTimeout(() => sf.p0.select(), 50); }
-
-  // ---------- self test (run window.__selfTest() in the console) ----------
-  window.__selfTest = () => {
-    const s = { ...DEFAULTS };
-    const eq = (a, b, msg) => { if (a !== b) throw new Error(`${msg}: expected ${b}, got ${a}`); };
-    // RummyTalk "Scoring Individual Hands of a Two-Handed Game" worked example.
-    const hands = [
-      { knocker: 0, type: 'knock', kn: 8, opp: 20 },           // A +12 in G1
-      { knocker: 0, type: 'gin', kn: 0, opp: 14 },             // A +39 in G1, G2
-      { knocker: 0, type: 'knock', kn: 8, opp: 7 },            // B undercut +26 in G1
-      { knocker: 0, type: 'gin', kn: 0, opp: 30, suit: 'S' },  // A +110 (spade) in G1, G2, G3
-    ];
-    const res = compute(hands, s);
-    eq(res.rows[0].r.pts, 12, 'knock'); eq(res.rows[0].hit.join(), '0', 'knock cols');
-    eq(res.rows[1].r.pts, 39, 'gin'); eq(res.rows[1].hit.join(), '0,1', 'gin cols');
-    eq(res.rows[2].r.winner, 1, 'undercut winner'); eq(res.rows[2].r.pts, 26, 'undercut'); eq(res.rows[2].hit.join(), '0', 'undercut cols');
-    eq(res.rows[3].r.pts, 110, 'spade gin'); eq(res.rows[3].r.bonusBoxes, 4, 'spade gin boxes'); eq(res.rows[3].hit.join(), '0,1,2', 'spade gin cols');
-    eq(res.cols[0].score[0], 161, 'G1 total'); eq(res.cols[1].score[0], 149, 'G2 total'); eq(res.cols[2].score[0], 110, 'G3 total');
-    // Tie counts as undercut: 25 only.
-    eq(scoreHand({ knocker: 0, type: 'knock', kn: 5, opp: 5 }, s).pts, 25, 'tie');
-    // "Calculating the Total Score" column 2: 279 vs 115, 7 boxes ahead -> 868.
-    const v = colValue({ score: [279, 115], boxes: [9, 2], winner: 0 }, 1, s);
-    eq(v.value, 868, 'column value');
-    // Game 3 doubles; shutout doubles.
-    eq(colValue({ score: [279, 115], boxes: [9, 2], winner: 0 }, 2, s).value, 1736, 'game 3 double');
-    eq(colValue({ score: [260, 0], boxes: [6, 0], winner: 0 }, 0, s).value, (260 + 250 + 260 + 150) * 2, 'shutout');
-    // Column closes and later wins skip it; a player whose first win comes after G1 closes starts in G2.
-    const s2 = { ...s, target: 50 };
-    const r2 = compute([{ knocker: 0, type: 'gin', kn: 0, opp: 30 }, { knocker: 1, type: 'knock', kn: 2, opp: 10 }], s2);
-    eq(r2.cols[0].closed, true, 'G1 closed'); eq(r2.rows[1].hit.join(), '1', 'late first win goes to G2');
-    // Rounding: nearest 500.
-    eq(roundPts(6252, s), 6500, 'round up'); eq(roundPts(6100, s), 6000, 'round down');
-    return 'All scoring tests passed';
-  };
+  if (firstRun) openSettings(true);
 })();
 </script>
 </body>
