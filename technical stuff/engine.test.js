@@ -1,5 +1,5 @@
 // Scoring engine tests. Run: npm test
-// Loads the <script id="engine"> block straight out of index.html, so the page and the tests
+// Loads the <script id="engine"> block straight out of Gin Scorekeeper.html, so the app and the tests
 // always exercise the same code.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -7,9 +7,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'Gin Scorekeeper.html'), 'utf8');
 const block = html.match(/<script id="engine">([\s\S]*?)<\/script>/);
-assert.ok(block, 'index.html must contain <script id="engine">');
+assert.ok(block, 'Gin Scorekeeper.html must contain <script id="engine">');
 const E = vm.runInNewContext(`${block[1]}\nGinEngine`);
 const S = { ...E.DEFAULTS };
 // Values made inside the sandbox have their own Array prototype; copy them before deep-comparing.

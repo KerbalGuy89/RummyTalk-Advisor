@@ -1,7 +1,7 @@
-// Builds the shareable files into dist/. Run: npm run build
-//   dist/Gin Scorekeeper - User Guide.docx
-//   dist/Gin Scorekeeper.zip  (one "Gin Scorekeeper" folder: the app as "Gin Scorekeeper.html" + the guide)
-// Keep the guide's wording in sync with the button labels and messages in index.html.
+// Builds the files people use into the top-level project folder. Run: npm run build
+//   Gin Scorekeeper - User Guide.docx   (committed)
+//   Gin Scorekeeper.zip                 (local only, for emailing: a "Gin Scorekeeper" folder with the app and the guide)
+// Keep the guide's wording in sync with the button labels and messages in Gin Scorekeeper.html.
 const fs = require('node:fs');
 const path = require('node:path');
 const JSZip = require('jszip');
@@ -11,9 +11,9 @@ const {
 } = require('docx');
 
 const ROOT = path.join(__dirname, '..');
-const DIST = path.join(ROOT, 'dist');
 const HTML_NAME = 'Gin Scorekeeper.html';
 const GUIDE_NAME = 'Gin Scorekeeper - User Guide.docx';
+const ZIP_NAME = 'Gin Scorekeeper.zip';
 const WEB_LINK = 'https://kerbalguy89.github.io/RummyTalk-Advisor/';
 
 // ---------- guide building blocks ----------
@@ -280,26 +280,15 @@ function buildGuide() {
   return Packer.toBuffer(doc);
 }
 
-// The zipped copy runs from a local file, where the home-screen manifest and icon don't exist.
-function offlineHtml() {
-  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-  const links = /^<link rel="(manifest|apple-touch-icon)"[^>]*>\r?\n/gm;
-  const found = html.match(links) || [];
-  if (found.length !== 2) throw new Error(`Expected 2 web-only <link> tags in index.html, found ${found.length}`);
-  return html.replace(links, '');
-}
-
 async function main() {
-  fs.mkdirSync(DIST, { recursive: true });
   const guide = await buildGuide();
-  fs.writeFileSync(path.join(DIST, GUIDE_NAME), guide);
+  fs.writeFileSync(path.join(ROOT, GUIDE_NAME), guide);
 
   const zip = new JSZip();
-  zip.folder('Gin Scorekeeper').file(HTML_NAME, offlineHtml()).file(GUIDE_NAME, guide);
-  const zipBuf = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
-  fs.writeFileSync(path.join(DIST, 'Gin Scorekeeper.zip'), zipBuf);
+  zip.folder('Gin Scorekeeper').file(HTML_NAME, fs.readFileSync(path.join(ROOT, HTML_NAME))).file(GUIDE_NAME, guide);
+  fs.writeFileSync(path.join(ROOT, ZIP_NAME), await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }));
 
-  for (const f of fs.readdirSync(DIST)) console.log(`dist/${f}  ${(fs.statSync(path.join(DIST, f)).size / 1024).toFixed(1)} KB`);
+  for (const f of [GUIDE_NAME, ZIP_NAME]) console.log(`${f}  ${(fs.statSync(path.join(ROOT, f)).size / 1024).toFixed(1)} KB`);
 }
 
 main().catch(err => { console.error(err); process.exit(1); });
